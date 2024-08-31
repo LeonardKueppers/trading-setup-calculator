@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="de">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Trading Tools</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        background-image: url("stonks.webp");
+        background-size: cover;
+        background-repeat: no-repeat;
+        background-position: center;
+        background-attachment: fixed;
+        color: white;
+      }
+      h1 {
+        color: #fff;
+        padding-top: 20px;
+        border: 3px solid #28a745; /* Rahmen in der gleichen Farbe wie der Button */
+        padding: 10px;
+        border-radius: 8px;
+        background-color: rgba(
+          40,
+          167,
+          69,
+          0.8
+        ); /* Hintergrundfarbe der Überschrift */
+        width: fit-content; /* Passt die Breite an den Inhalt an */
+        margin: 20px auto; /* Zentriert die Überschrift horizontal */
+        text-align: center; /* Zentriert den Text innerhalb der Überschrift */
+      }
+      .container {
+        max-width: 500px;
+        margin: 40px auto;
+        padding: 20px;
+        background-color: rgba(255, 255, 255, 0.8);
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        color: #000;
+      }
+      label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: bold;
+      }
+      input {
+        width: calc(100% - 24px);
+        padding: 10px;
+        margin-bottom: 15px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+      }
+      button {
+        width: 100%;
+        padding: 10px;
+        background-color: #28a745;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        font-size: 16px;
+        cursor: pointer;
+      }
+      button:hover {
+        background-color: #218838;
+      }
+      .results {
+        margin-top: 20px;
+        font-size: 18px;
+      }
+      .nav-buttons {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 20px;
+        padding: 0 10px;
+      }
+      .nav-buttons button {
+        background-color: #28a745; /* Hintergrundfarbe der Navigationsbuttons */
+        color: white;
+        width: 48%;
+        border: none;
+        border-radius: 4px;
+        font-size: 16px;
+        cursor: pointer;
+        padding: 10px;
+      }
+      .nav-buttons button:hover {
+        background-color: #218838;
+      }
+      .footer {
+        text-align: center;
+        margin-top: 20px;
+        font-size: 14px;
+        color: #fff;
+        background-color: rgba(40, 167, 69, 0.8);
+        padding: 10px;
+        border-radius: 8px;
+        width: fit-content;
+        margin: 20px auto;
+      }
+    </style>
+  </head>
+  <body>
+    <h1 id="page-title">Trading Setup Calculator</h1>
+
+    <div class="nav-buttons">
+      <button onclick="showPage('calculator')">Trading Setup Calculator</button>
+      <button onclick="showPage('profitable')">Profitable?</button>
+    </div>
+
+    <div id="calculator-page" class="container">
+      <label for="buyIn">Buy-in (Euro,Cent):</label>
+      <input type="number" id="buyInEuro" placeholder="Euro" step="1" />
+      <input
+        type="number"
+        id="buyInCent"
+        placeholder="Cent"
+        step="1"
+        min="0"
+        max="99"
+      />
+
+      <label for="sl">Stop-Loss (SL) %:</label>
+      <input type="number" id="sl" placeholder="Stop-Loss %" step="0.01" />
+
+      <label for="tp">Take-Profit (TP) %:</label>
+      <input type="number" id="tp" placeholder="Take-Profit %" step="0.01" />
+
+      <button onclick="calculate()">Berechnen</button>
+
+      <div class="results" id="calculator-results"></div>
+    </div>
+
+    <div id="profitable-page" class="container" style="display: none">
+      <label for="successfulTrades">Erfolgreiche Trades von 10:</label>
+      <input
+        type="number"
+        id="successfulTrades"
+        placeholder="Anzahl erfolgreicher Trades"
+        step="1"
+        min="0"
+        max="10"
+      />
+
+      <label for="sl2">Stop-Loss (SL) %:</label>
+      <input type="number" id="sl2" placeholder="Stop-Loss %" step="0.01" />
+
+      <label for="tp2">Take-Profit (TP) %:</label>
+      <input type="number" id="tp2" placeholder="Take-Profit %" step="0.01" />
+
+      <button onclick="calculateProfit()">Berechnen</button>
+
+      <div class="results" id="profitable-results"></div>
+    </div>
+
+    <div class="footer">by Leonard Küppers</div>
+
+    <script>
+      function showPage(page) {
+        document.getElementById("calculator-page").style.display = "none";
+        document.getElementById("profitable-page").style.display = "none";
+
+        if (page === "calculator") {
+          document.getElementById("calculator-page").style.display = "block";
+          document.getElementById("page-title").innerText =
+            "Trading Setup Calculator";
+        } else if (page === "profitable") {
+          document.getElementById("profitable-page").style.display = "block";
+          document.getElementById("page-title").innerText = "Profitable?";
+        }
+      }
+
+      function calculate() {
+        const buyInEuro =
+          parseFloat(document.getElementById("buyInEuro").value) || 0;
+        const buyInCent =
+          parseFloat(document.getElementById("buyInCent").value) || 0;
+        const buyIn = buyInEuro + buyInCent / 100;
+
+        const slPercent = parseFloat(document.getElementById("sl").value);
+        const tpPercent = parseFloat(document.getElementById("tp").value);
+
+        if (isNaN(buyIn) || isNaN(slPercent) || isNaN(tpPercent)) {
+          document.getElementById("calculator-results").innerHTML =
+            "Bitte geben Sie gültige Werte ein.";
+          return;
+        }
+
+        const slValue = buyIn * (1 - slPercent / 100);
+        const tpValue = buyIn * (1 + tpPercent / 100);
+
+        const slEuro = Math.floor(slValue);
+        const slCent = Math.round((slValue - slEuro) * 100);
+
+        const tpEuro = Math.floor(tpValue);
+        const tpCent = Math.round((tpValue - tpEuro) * 100);
+
+        document.getElementById("calculator-results").innerHTML = `
+                <p>Stop-Loss: ${slEuro} Euro, ${slCent} Cent</p>
+                <p>Take-Profit: ${tpEuro} Euro, ${tpCent} Cent</p>
+            `;
+      }
+
+      function calculateProfit() {
+        const successfulTrades =
+          parseFloat(document.getElementById("successfulTrades").value) || 0;
+        const slPercent = parseFloat(document.getElementById("sl2").value);
+        const tpPercent = parseFloat(document.getElementById("tp2").value);
+
+        if (isNaN(successfulTrades) || isNaN(slPercent) || isNaN(tpPercent)) {
+          document.getElementById("profitable-results").innerHTML =
+            "Bitte geben Sie gültige Werte ein, alle Felder sind auszufüllen.";
+          return;
+        }
+
+        const totalTrades = 10;
+        const lossTrades = totalTrades - successfulTrades;
+
+        const avgGain = successfulTrades * tpPercent;
+        const avgLoss = lossTrades * slPercent;
+
+        const expectedReturn = (avgGain - avgLoss) / totalTrades;
+        const totalReturn = avgGain - avgLoss;
+        const isProfitable = totalReturn > 0;
+
+        document.getElementById("profitable-results").innerHTML = `
+            <p>Erwartete Rendite pro Trade: ${expectedReturn.toFixed(2)}%</p>
+            <p>Gesamtrendite nach 10 Trades: ${totalReturn.toFixed(2)}%</p>
+            <p>Ist die Strategie profitabel? ${isProfitable ? "Ja" : "Nein"}</p>
+        `;
+      }
+    </script>
+  </body>
+</html>

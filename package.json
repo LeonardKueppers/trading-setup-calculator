@@ -1,0 +1,25 @@
+{
+  "name": "trading-tool",
+  "version": "1.0.0",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder"
+  },
+  "devDependencies": {
+    "electron": "^32.0.1",
+    "electron-builder": "^24.13.3"
+  },
+  "build": {
+    "appId": "com.example.tradingtool",
+    "win": {
+      "target": 
+    
+        "portable"
+      
+    },
+    "directories": {
+      "output": "dist"
+    }
+  }
+}
